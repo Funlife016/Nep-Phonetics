@@ -23,8 +23,12 @@ class NepaliImeService : InputMethodService() {
                 currentInputConnection?.setComposingText(preview, 1)
             },
             onCommit = { finalText ->
-                Logger.d("IC: finishComposingText() + commitText('$finalText')")
-                currentInputConnection?.finishComposingText()
+                // commitText() already finalizes/replaces the current composing
+                // region on its own. Calling finishComposingText() first would
+                // finalize the composing preview into real text, and THEN
+                // commitText() would insert the same text again — that was the
+                // doubling bug (कक, ततिि, etc).
+                Logger.d("IC: commitText('$finalText')")
                 currentInputConnection?.commitText(finalText, 1)
             },
             onLog = { Logger.d(it) }
@@ -54,11 +58,6 @@ class NepaliImeService : InputMethodService() {
                 "deviceId=${event.deviceId} source=${event.source}"
         )
 
-        // Ignore OS-generated auto-repeat (holding a key down) — we only want
-        // the initial press to produce a character. If duplication turns out
-        // to be caused by something other than repeatCount>0 events, the log
-        // above will show two DOWN lines with repeatCount=0 close together,
-        // which points at the keyboard driver itself double-firing.
         if (event.repeatCount > 0) {
             Logger.d("KEY DOWN ignored (auto-repeat)")
             return true
