@@ -6,12 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 
-/**
- * Physical-keyboard-first IME. Deliberately has no soft keyboard UI —
- * onCreateInputView returns a zero-size view and onEvaluateInputViewShown
- * returns false, so it stays out of the way when a hardware keyboard is
- * attached (which is the only scenario this IME is designed for).
- */
 class NepaliImeService : InputMethodService() {
 
     private lateinit var table: MappingTable
@@ -19,23 +13,26 @@ class NepaliImeService : InputMethodService() {
 
     override fun onCreate() {
         super.onCreate()
+        Logger.init(applicationContext)
+        Logger.d("service: onCreate")
         table = MappingTable(this)
         engine = TransliterationEngine(
             table = table,
             onUpdateComposing = { preview ->
+                Logger.d("IC: setComposingText('$preview')")
                 currentInputConnection?.setComposingText(preview, 1)
             },
             onCommit = { finalText ->
+                Logger.d("IC: finishComposingText() + commitText('$finalText')")
                 currentInputConnection?.finishComposingText()
                 currentInputConnection?.commitText(finalText, 1)
-            }
+            },
+            onLog = { Logger.d(it) }
         )
     }
 
     override fun onCreateInputView(): View {
-        return View(this).apply {
-            layoutParams = ViewGroup.LayoutParams(0, 0)
-        }
+        return View(this).apply { layoutParams = ViewGroup.LayoutParams(0, 0) }
     }
 
     override fun onEvaluateInputViewShown(): Boolean = false
@@ -44,28 +41,39 @@ class NepaliImeService : InputMethodService() {
 
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         super.onStartInput(attribute, restarting)
+        Logger.d("service: onStartInput restarting=$restarting inputType=${attribute?.inputType}")
         engine.onBoundary()
     }
 
-    // Tracks which key codes WE consumed on the way down, so we consume the
-    // matching key-up too. If a down/up pair is only half-consumed, some
-    // devices fall back to inserting the raw character directly into the
-    // EditText in addition to whatever we committed — that's what caused
-    // the doubled/"mesh" output.
     private val consumedKeyCodes = mutableSetOf<Int>()
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        Logger.d(
+            "KEY DOWN code=$keyCode unicode=${event.getUnicodeChar(event.metaState)} " +
+                "repeatCount=${event.repeatCount} downTime=${event.downTime} eventTime=${event.eventTime} " +
+                "deviceId=${event.deviceId} source=${event.source}"
+        )
+
+        // Ignore OS-generated auto-repeat (holding a key down) — we only want
+        // the initial press to produce a character. If duplication turns out
+        // to be caused by something other than repeatCount>0 events, the log
+        // above will show two DOWN lines with repeatCount=0 close together,
+        // which points at the keyboard driver itself double-firing.
+        if (event.repeatCount > 0) {
+            Logger.d("KEY DOWN ignored (auto-repeat)")
+            return true
+        }
+
         val handled = handleKeyDown(keyCode, event)
+        Logger.d("KEY DOWN code=$keyCode handled=$handled")
         if (handled) consumedKeyCodes.add(keyCode) else consumedKeyCodes.remove(keyCode)
         return handled
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        return if (consumedKeyCodes.remove(keyCode)) {
-            true // swallow it — we already handled the down half ourselves
-        } else {
-            super.onKeyUp(keyCode, event)
-        }
+        val wasConsumed = consumedKeyCodes.remove(keyCode)
+        Logger.d("KEY UP code=$keyCode wasConsumedOnDown=$wasConsumed")
+        return if (wasConsumed) true else super.onKeyUp(keyCode, event)
     }
 
     private fun handleKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -74,7 +82,7 @@ class NepaliImeService : InputMethodService() {
 
         when (keyCode) {
             KeyEvent.KEYCODE_DEL -> {
-                return engine.onBackspace() // false -> let system handle normal delete
+                return engine.onBackspace()
             }
             KeyEvent.KEYCODE_SPACE -> {
                 engine.onBoundary(" ")
@@ -89,7 +97,7 @@ class NepaliImeService : InputMethodService() {
             KeyEvent.KEYCODE_MOVE_HOME,
             KeyEvent.KEYCODE_MOVE_END -> {
                 engine.onBoundary()
-                return false // not consumed by us -> system handles nav/newline/action normally
+                return false
             }
         }
 
@@ -98,11 +106,6 @@ class NepaliImeService : InputMethodService() {
             return false
         }
         val c = unicodeChar.toChar()
-
-        // Letters go through the transliteration engine. Digits/punctuation
-        // also go through it — the engine checks the map (e.g. Devanagari
-        // digits, danda for '.') and falls back to the literal char if
-        // there's no mapping, so this branch covers both cases the same way.
         engine.onLatinChar(c)
         return true
     }
