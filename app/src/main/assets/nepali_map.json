@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "name": "Nepali Devanagari Transliteration Map",
+    "version": "0.1.0",
+    "description": "Latin-to-Devanagari key mapping for a physical-keyboard Android IME. Longest-match-first, timeout-based composition engine reads this file.",
+    "script": "Devanagari",
+    "language": "Nepali (ne-NP)",
+    "maxSequenceLength": 4,
+    "matchTimeoutMs": 300,
+    "notes": [
+      "Every entry has one or more 'triggers' (the Latin key sequence typed) and a 'value' (the Devanagari output).",
+      "type determines how the engine composes it: 'consonant' outputs the base consonant (with implicit 'a' sound, engine appends virama when followed by another consonant/vowel needing a matra). 'matra' entries only apply immediately after a consonant. 'independentVowel' applies at word start / after a non-consonant / after a modifier. 'modifier' attaches to the previous akshara without adding a virama break. 'conjunct' is a hard override that beats the general virama-stacking logic when the exact trigger sequence is typed.",
+      "Engine should always prefer the LONGEST matching trigger sequence in the buffer before committing.",
+      "Feel free to add/remove/reorder triggers per glyph. Do not need to touch code to retune this file."
+    ]
+  },
+
+  "consonants": [
+    { "id": "k",   "triggers": ["k"],        "value": "क" },
+    { "id": "kh",  "triggers": ["kh"],       "value": "ख" },
+    { "id": "g",   "triggers": ["g"],        "value": "ग" },
+    { "id": "gh",  "triggers": ["gh"],       "value": "घ" },
+    { "id": "ng",  "triggers": ["NG", "ng"], "value": "ङ" },
+
+    { "id": "ch",  "triggers": ["ch"],       "value": "च" },
+    { "id": "chh", "triggers": ["chh", "Ch"],"value": "छ" },
+    { "id": "j",   "triggers": ["j"],        "value": "ज" },
+    { "id": "jh",  "triggers": ["jh"],       "value": "झ" },
+    { "id": "ny",  "triggers": ["NY", "ny"], "value": "ञ" },
+
+    { "id": "T",   "triggers": ["T"],        "value": "ट" },
+    { "id": "Th",  "triggers": ["Th"],       "value": "ठ" },
+    { "id": "D",   "triggers": ["D"],        "value": "ड" },
+    { "id": "Dh",  "triggers": ["Dh"],       "value": "ढ" },
+    { "id": "N",   "triggers": ["N"],        "value": "ण" },
+
+    { "id": "t",   "triggers": ["t"],        "value": "त" },
+    { "id": "th",  "triggers": ["th"],       "value": "थ" },
+    { "id": "d",   "triggers": ["d"],        "value": "द" },
+    { "id": "dh",  "triggers": ["dh"],       "value": "ध" },
+    { "id": "n",   "triggers": ["n"],        "value": "न" },
+
+    { "id": "p",   "triggers": ["p"],        "value": "प" },
+    { "id": "ph",  "triggers": ["ph", "f"],  "value": "फ" },
+    { "id": "b",   "triggers": ["b"],        "value": "ब" },
+    { "id": "bh",  "triggers": ["bh"],       "value": "भ" },
+    { "id": "m",   "triggers": ["m"],        "value": "म" },
+
+    { "id": "y",   "triggers": ["y"],        "value": "य" },
+    { "id": "r",   "triggers": ["r"],        "value": "र" },
+    { "id": "l",   "triggers": ["l"],        "value": "ल" },
+    { "id": "v",   "triggers": ["v", "w"],   "value": "व" },
+
+    { "id": "sh",  "triggers": ["sh"],       "value": "श" },
+    { "id": "Sh",  "triggers": ["Sh", "SH"], "value": "ष" },
+    { "id": "s",   "triggers": ["s"],        "value": "स" },
+    { "id": "h",   "triggers": ["h"],        "value": "ह" },
+
+    { "id": "ksh", "triggers": ["x"],        "value": "क्ष", "type": "conjunct" },
+    { "id": "gya", "triggers": ["gy", "GY"], "value": "ज्ञ", "type": "conjunct" },
+
+    { "id": "trra","triggers": ["tr"],       "value": "त्र", "type": "conjunct" },
+    { "id": "shra","triggers": ["shr"],      "value": "श्र", "type": "conjunct" }
+  ],
+
+  "independentVowels": [
+    { "id": "a",   "triggers": ["a"],           "value": "अ" },
+    { "id": "aa",  "triggers": ["aa", "A"],      "value": "आ" },
+    { "id": "i",   "triggers": ["i"],            "value": "इ" },
+    { "id": "ii",  "triggers": ["ii", "I", "ee"],"value": "ई" },
+    { "id": "u",   "triggers": ["u"],            "value": "उ" },
+    { "id": "uu",  "triggers": ["uu", "U", "oo"],"value": "ऊ" },
+    { "id": "e",   "triggers": ["e"],            "value": "ए" },
+    { "id": "ai",  "triggers": ["ai"],           "value": "ऐ" },
+    { "id": "o",   "triggers": ["o"],            "value": "ओ" },
+    { "id": "au",  "triggers": ["au", "ou"],     "value": "औ" }
+  ],
+
+  "matras": [
+    { "id": "a",   "triggers": ["a"],           "value": "" },
+    { "id": "aa",  "triggers": ["aa", "A"],      "value": "ा" },
+    { "id": "i",   "triggers": ["i"],            "value": "ि" },
+    { "id": "ii",  "triggers": ["ii", "I", "ee"],"value": "ी" },
+    { "id": "u",   "triggers": ["u"],            "value": "ु" },
+    { "id": "uu",  "triggers": ["uu", "U", "oo"],"value": "ू" },
+    { "id": "e",   "triggers": ["e"],            "value": "े" },
+    { "id": "ai",  "triggers": ["ai"],           "value": "ै" },
+    { "id": "o",   "triggers": ["o"],            "value": "ो" },
+    { "id": "au",  "triggers": ["au", "ou"],     "value": "ौ" }
+  ],
+
+  "modifiers": [
+    { "id": "anusvara",  "triggers": ["M", "n1"], "value": "ं", "description": "nasal, e.g. sambodhan / rang" },
+    { "id": "chandrabindu", "triggers": ["z", "~"], "value": "ँ", "description": "nasalized vowel, e.g. auँsi" },
+    { "id": "visarga", "triggers": ["H"], "value": "ः", "description": "rare in Nepali but keep for Sanskrit loanwords" },
+    { "id": "virama", "triggers": ["-", "\\"], "value": "्", "description": "explicit halant, forces consonant cluster / removes inherent 'a'" },
+    { "id": "nukta", "triggers": ["'"], "value": "़", "description": "for loan sounds e.g. क़ ज़ फ़" },
+    { "id": "avagraha", "triggers": ["S"], "value": "ऽ" },
+    { "id": "om", "triggers": ["OM", "om3"], "value": "ॐ" }
+  ],
+
+  "digits": [
+    { "triggers": ["0"], "value": "०" },
+    { "triggers": ["1"], "value": "१" },
+    { "triggers": ["2"], "value": "२" },
+    { "triggers": ["3"], "value": "३" },
+    { "triggers": ["4"], "value": "४" },
+    { "triggers": ["5"], "value": "५" },
+    { "triggers": ["6"], "value": "६" },
+    { "triggers": ["7"], "value": "७" },
+    { "triggers": ["8"], "value": "८" },
+    { "triggers": ["9"], "value": "९" }
+  ],
+
+  "punctuation": [
+    { "triggers": ["."], "value": "।", "description": "poorna viram (danda), replaces Latin period" },
+    { "triggers": [".."], "value": "॥", "description": "double danda, used at end of verses/shlokas" }
+  ],
+
+  "passthrough": {
+    "description": "Keys not present anywhere above (space, Enter, digits if you disable Devanagari numerals, Latin punctuation like , ? ! @ etc.) should be committed as-is with no transliteration.",
+    "examples": [" ", ",", "?", "!", "@", "#", ";", ":", "(", ")"]
+  }
+}

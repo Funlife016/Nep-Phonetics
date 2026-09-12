@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  No subtype declared on purpose: this IME is designed around a physical
+  QWERTY keyboard, so we don't need per-locale soft-keyboard subtypes.
+  Add <subtype> entries here later if you want it to appear per-language
+  in system IME pickers.
+-->
+<input-method xmlns:android="http://schemas.android.com/apk/res/android">
+</input-method>
