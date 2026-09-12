@@ -22,8 +22,8 @@
     { "id": "gh",  "triggers": ["gh"],       "value": "घ" },
     { "id": "ng",  "triggers": ["NG", "ng"], "value": "ङ" },
 
-    { "id": "ch",  "triggers": ["ch"],       "value": "च" },
-    { "id": "chh", "triggers": ["chh", "Ch"],"value": "छ" },
+    { "id": "ch",  "triggers": ["c"],       "value": "च" },
+    { "id": "chh", "triggers": ["ch", "Ch"],"value": "छ" },
     { "id": "j",   "triggers": ["j"],        "value": "ज" },
     { "id": "jh",  "triggers": ["jh"],       "value": "झ" },
     { "id": "ny",  "triggers": ["NY", "ny"], "value": "ञ" },
