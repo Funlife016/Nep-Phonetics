@@ -12,7 +12,7 @@ class TransliterationEngine(
     private val timeoutMs = table.matchTimeoutMs
     private val handler = Handler(Looper.getMainLooper())
     private var pendingBuffer = StringBuilder()
-    private var lastCommittedWasConsonant = false
+    private var lastCommittedWasBareConsonant = false
 
     private val timeoutRunnable = Runnable {
         onLog("engine: timeout fired, resolving pending='${pendingBuffer}'")
@@ -37,6 +37,7 @@ class TransliterationEngine(
             } else {
                 onLog("engine: '$c' not in map at all, passthrough commit")
                 onCommit(c.toString())
+                lastCommittedWasBareConsonant = false
             }
         }
     }
@@ -45,7 +46,7 @@ class TransliterationEngine(
         onLog("engine: onBoundary(literal='$literal') pending='${pendingBuffer}'")
         handler.removeCallbacks(timeoutRunnable)
         resolvePending()
-        lastCommittedWasConsonant = false
+        lastCommittedWasBareConsonant = false
         if (literal != null) onCommit(literal)
     }
 
@@ -67,7 +68,7 @@ class TransliterationEngine(
 
     private fun bestMatchFor(seq: String): Pair<String, MapEntry>? {
         if (seq.isEmpty()) return null
-        val preferredCategory = if (lastCommittedWasConsonant) "matras" else "independentVowels"
+        val preferredCategory = if (lastCommittedWasBareConsonant) "matras" else "independentVowels"
         table.findMatch(seq, preferredCategory)?.let { return preferredCategory to it }
         return table.findAnyMatch(seq)
     }
@@ -86,13 +87,25 @@ class TransliterationEngine(
         val match = bestMatchFor(seq)
         if (match != null) {
             val (category, entry) = match
+            val isBareConsonant = (category == "consonants")
+
+            if (isBareConsonant && lastCommittedWasBareConsonant) {
+                // Previous syllable was a bare consonant with no vowel attached yet —
+                // join it to this new consonant with a virama instead of leaving two
+                // separate full consonants sitting next to each other (which is what
+                // was reading as "duplicated" text, e.g. न + न instead of न्).
+                val virama = table.viramaValue()
+                onLog("engine: inserting virama '$virama' between consonant cluster")
+                onCommit(virama)
+            }
+
             onLog("engine: COMMIT seq='$seq' -> '${entry.value}' (category=$category)")
             onCommit(entry.value)
-            lastCommittedWasConsonant = (category == "consonants" || entry.type == "consonant")
+            lastCommittedWasBareConsonant = isBareConsonant
         } else {
             onLog("engine: COMMIT unmapped seq='$seq' as raw text")
             onCommit(seq)
-            lastCommittedWasConsonant = false
+            lastCommittedWasBareConsonant = false
         }
         pendingBuffer = StringBuilder()
     }
