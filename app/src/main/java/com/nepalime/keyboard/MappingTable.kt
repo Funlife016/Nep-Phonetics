@@ -99,4 +99,9 @@ class MappingTable(context: Context, assetFileName: String = "nepali_map.json") 
     /** Exact match in any category, first one wins — used as a fallback. */
     fun findAnyMatch(seq: String): Pair<String, MapEntry>? =
         triggerIndex[seq]?.firstOrNull()
+    /** The virama/halant glyph, pulled from the modifiers list so it stays tinkerable via JSON. */
+    fun viramaValue(): String =
+        modifiers.firstOrNull { it.type == "virama" }?.value
+            ?: triggerIndex["-"]?.firstOrNull { it.first == "modifiers" }?.second?.value
+            ?: "्"
 }
